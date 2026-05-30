@@ -33,7 +33,7 @@ export function Navbar() {
 		const el = rootRef.current
 		if (!el) return
 
-		gsap.set(el, { opacity: 0, y: -12, clipPath: "inset(0 0 100% 0)" })
+		gsap.set(el, { opacity: 0, y: -14, clipPath: "inset(0 0 100% 0)" })
 
 		let shown = false
 		let hiding = false
@@ -46,7 +46,7 @@ export function Navbar() {
 				opacity: 1,
 				y: 0,
 				clipPath: "inset(0 0 0% 0)",
-				duration: 0.6,
+				duration: 0.55,
 				ease: "power4.out",
 				overwrite: true,
 			})
@@ -57,9 +57,9 @@ export function Navbar() {
 			hiding = true
 			gsap.to(el, {
 				opacity: 0,
-				y: -14,
+				y: -16,
 				clipPath: "inset(0 0 100% 0)",
-				duration: 0.4,
+				duration: 0.35,
 				ease: "power4.in",
 				overwrite: true,
 				onComplete: () => {
@@ -93,7 +93,7 @@ export function Navbar() {
 		if (!el) return
 		const from = el.querySelector("[data-lang-current]")
 		if (!from) return
-		gsap.fromTo(from, { y: 10, opacity: 0 }, { y: 0, opacity: 1, duration: 0.25, ease: "power2.out" })
+		gsap.fromTo(from, { y: 10, opacity: 0 }, { y: 0, opacity: 1, duration: 0.22, ease: "power2.out" })
 	}, [lang])
 
 	useEffect(() => {
@@ -121,19 +121,18 @@ export function Navbar() {
 		gsap.fromTo(
 			el,
 			{ x: dx, y: dy, scaleX: sx, scaleY: sy, transformOrigin: "top left" },
-			{ x: 0, y: 0, scaleX: 1, scaleY: 1, duration: 0.95, ease: "power4.inOut", clearProps: "transform" },
+			{ x: 0, y: 0, scaleX: 1, scaleY: 1, duration: 0.9, ease: "power4.inOut", clearProps: "transform" },
 		)
 	}, [pathname])
 
 	return (
 		<div ref={rootRef} className="fixed left-0 right-0 top-0 z-[9997] px-4 pt-4">
 			<div className="sf-shell">
-				<div className="sf-panel sf-panel--hard relative overflow-hidden rounded-[var(--r2)]">
-					<div className="absolute inset-0 opacity-60 pointer-events-none sf-sheen" />
-					<div className="flex items-center justify-between gap-4 px-5 py-4">
+				<div className="sf-frame overflow-hidden">
+					<div className="px-5 py-4 flex items-center justify-between gap-4">
 						<Link href="/" className="inline-flex items-center gap-3 shrink-0">
-							<span className="size-2 rounded-full bg-white/80 shadow-[0_0_22px_rgba(96,165,250,0.22)]" />
-							<span className="text-[11px] tracking-[0.30em] text-white/85">STORE FINDER</span>
+							<span className="size-2 rounded-full" style= background: "var(--n1)", boxShadow: "0 0 24px rgba(0,229,255,0.35)"  />
+							<span className="text-[11px] tracking-[0.32em] text-white/85">STORE FINDER</span>
 						</Link>
 
 						{pathname === "/results" && (
@@ -145,7 +144,7 @@ export function Navbar() {
 						)}
 
 						<div className="flex items-center gap-3 shrink-0">
-							<div className="hidden sm:block text-[11px] text-white/45 tracking-[0.26em]">LANG</div>
+							<div className="hidden sm:block sf-kicker">LANG</div>
 							<div className="flex items-center rounded-full border border-white/10 bg-white/5 p-1">
 								{LANGS.map((l) => (
 									<button
@@ -163,6 +162,7 @@ export function Navbar() {
 							</div>
 						</div>
 					</div>
+					<div className="sf-neon-line" />
 				</div>
 			</div>
 		</div>

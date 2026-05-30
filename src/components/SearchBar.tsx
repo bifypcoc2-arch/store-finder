@@ -17,15 +17,12 @@ export const SearchBar = forwardRef<HTMLDivElement, Props>(function SearchBar(
 	ref,
 ) {
 	return (
-		<div ref={ref} data-search-shell className="sf-panel relative overflow-hidden rounded-[var(--r2)]">
-			<div className="absolute inset-0 opacity-55 pointer-events-none sf-sheen" />
+		<div ref={ref} data-search-shell className="sf-hard">
 			<div className={"px-5 " + (compact ? "py-3" : "py-4")}>
 				<form onSubmit={(e) => { e.preventDefault(); onSubmit() }}>
-					<label className={"block text-[11px] tracking-[0.26em] " + (compact ? "text-white/45" : "text-white/55")}>
-						SEARCH
-					</label>
+					<label className={"block sf-kicker " + (compact ? "opacity-80" : "")}>SEARCH</label>
 					<div className="mt-2 flex items-center gap-3">
-						<div className="size-2 rounded-full bg-white/60 shadow-[0_0_20px_rgba(167,139,250,0.18)]" />
+						<div className="size-2 rounded-full" style= background: "var(--n3)", boxShadow: "0 0 24px rgba(255,61,242,0.25)"  />
 						<input
 							suppressHydrationWarning
 							value={value}
