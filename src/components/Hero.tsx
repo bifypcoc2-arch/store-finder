@@ -5,12 +5,14 @@ import { useRouter } from "next/navigation"
 import { ensureGsap } from "@/lib/gsap/gsap"
 import { WebGLDots } from "@/components/WebGLDots"
 import { ScrollIndicator } from "@/components/ScrollIndicator"
+import { SearchBar } from "@/components/SearchBar"
 
 type SuggestItem = { name: string; kind: string }
 
 export function Hero() {
 	const router = useRouter()
 	const rootRef = useRef<HTMLElement | null>(null)
+	const searchShellRef = useRef<HTMLDivElement | null>(null)
 	const searchWrapRef = useRef<HTMLDivElement | null>(null)
 	const suggestsRef = useRef<HTMLDivElement | null>(null)
 
@@ -141,12 +143,26 @@ export function Hero() {
 		)
 	}, [open, items.length])
 
+	const navigateToResults = (val: string) => {
+		const shell = searchShellRef.current
+		if (shell) {
+			const r = shell.getBoundingClientRect()
+			sessionStorage.setItem(
+				"sf:searchAnim",
+				JSON.stringify({
+					from: { left: r.left, top: r.top, width: r.width, height: r.height },
+					value: val,
+				}),
+			)
+		}
+		router.push(`/results?q=${encodeURIComponent(val)}`)
+	}
+
 	return (
 		<section
 			ref={rootRef}
 			className="relative min-h-screen overflow-hidden bg-neutral-950 text-white"
 		>
-			{/* WebGL dots background */}
 			<WebGLDots className="absolute inset-0 opacity-90" />
 			<div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.10),transparent_55%)]" />
 			<div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_70%,rgba(120,180,255,0.10),transparent_55%)]" />
@@ -171,58 +187,47 @@ export function Hero() {
 				</p>
 
 				<div ref={searchWrapRef} className="mt-10 will-change-[clip-path]">
-					<div className="rounded-2xl border border-white/15 bg-white/5 backdrop-blur px-5 py-4">
-						<form
-							onSubmit={(e) => {
-								e.preventDefault()
-								const val = query.trim()
-								if (!val) return
-								router.push(`/results?q=${encodeURIComponent(val)}`)
-							}}
-						>
-							<label className="block text-sm text-white/60">Search</label>
-							<input
-								suppressHydrationWarning
-								value={query}
-								onChange={(e) => setQuery(e.target.value)}
-								onFocus={() => {
-									if (items.length) setOpen(true)
-								}}
-								onBlur={() => {
-									setTimeout(() => setOpen(false), 120)
-								}}
-								className="mt-2 w-full bg-transparent outline-none text-lg placeholder:text-white/30"
-								placeholder="Berlin, coffee, supermarket…"
-							/>
-						</form>
+					<SearchBar
+						ref={searchShellRef}
+						value={query}
+						onChange={setQuery}
+						onSubmit={() => {
+							const val = query.trim()
+							if (!val) return
+							navigateToResults(val)
+						}}
+						onFocus={() => {
+							if (items.length) setOpen(true)
+						}}
+						onBlur={() => {
+							setTimeout(() => setOpen(false), 120)
+						}}
+					/>
 
-						{open && (
-							<div ref={suggestsRef} className="mt-3 space-y-2">
-								{loading && (
-									<div className="text-sm text-white/40">Loading…</div>
-								)}
+					{open && (
+						<div ref={suggestsRef} className="mt-3 space-y-2">
+							{loading && (
+								<div className="text-sm text-white/40">Loading…</div>
+							)}
 
-								{items.map((it) => (
-									<button
-										key={`${it.kind}-${it.name}`}
-										type="button"
-										onClick={() => {
-											setQuery(it.name)
-											setOpen(false)
-											router.push(
-												`/results?q=${encodeURIComponent(it.name)}`,
-											)
-										}}
-										className="w-full text-left rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white/90 backdrop-blur hover:bg-white/10 transition"
-										data-suggest
-									>
-										<div className="text-sm text-white/50">{it.kind}</div>
-										<div className="text-base">{it.name}</div>
-									</button>
-								))}
-							</div>
-						)}
-					</div>
+							{items.map((it) => (
+								<button
+									key={`${it.kind}-${it.name}`}
+									type="button"
+									onClick={() => {
+										setQuery(it.name)
+										setOpen(false)
+										navigateToResults(it.name)
+									}}
+									className="w-full text-left rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white/90 backdrop-blur hover:bg-white/10 transition"
+									data-suggest
+								>
+									<div className="text-sm text-white/50">{it.kind}</div>
+									<div className="text-base">{it.name}</div>
+								</button>
+							))}
+						</div>
+					)}
 				</div>
 			</div>
 
