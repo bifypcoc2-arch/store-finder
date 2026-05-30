@@ -26,9 +26,22 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-/* Custom cursor */
-* { cursor: none; }
+/* Hide system cursor only on devices with a fine pointer (desktop/mouse). */
+@media (pointer: fine) {
+  * { cursor: none; }
+}
 
+/* Respect reduced motion: keep UI usable without heavy animation. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Custom cursor */
 .sf-cursor-dot {
   width: 6px;
   height: 6px;

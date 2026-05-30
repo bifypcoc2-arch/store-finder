@@ -8,7 +8,6 @@ type Props = {
 }
 
 export function ScrollIndicator({ className }: Props) {
-	const rootRef = useRef<HTMLDivElement | null>(null)
 	const arrowRef = useRef<HTMLDivElement | null>(null)
 
 	useEffect(() => {
@@ -23,18 +22,13 @@ export function ScrollIndicator({ className }: Props) {
 
 	return (
 		<div
-			ref={rootRef}
 			className={
 				className ??
 				"absolute left-1/2 bottom-10 -translate-x-1/2 flex flex-col items-center gap-4"
 			}
 		>
 			<div className="relative size-16">
-				<svg
-					className="absolute inset-0"
-					viewBox="0 0 64 64"
-					aria-hidden
-				>
+				<svg className="absolute inset-0" viewBox="0 0 64 64" aria-hidden>
 					<defs>
 						<path
 							id="circlePath"
@@ -47,13 +41,10 @@ export function ScrollIndicator({ className }: Props) {
 						</textPath>
 					</text>
 				</svg>
-				<div className="absolute inset-0 animate-[spin_10s_linear_infinite]" />
+				<div className="absolute inset-0 rounded-full border border-white/10 animate-[spin_10s_linear_infinite]" />
 			</div>
 
-			<div
-				ref={arrowRef}
-				className="flex flex-col items-center text-white/70"
-			>
+			<div ref={arrowRef} className="flex flex-col items-center text-white/70">
 				<div className="h-7 w-px bg-white/30" />
 				<div className="mt-1 size-2 rotate-45 border-b border-r border-white/60" />
 			</div>

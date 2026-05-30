@@ -162,31 +162,26 @@ export function Hero() {
 	}
 
 	return (
-		<section
-			ref={rootRef}
-			className="relative min-h-screen overflow-hidden bg-neutral-950 text-white"
-		>
+		<section ref={rootRef} className="relative min-h-screen overflow-hidden bg-neutral-950 text-white">
 			<WebGLDots className="absolute inset-0 opacity-90" />
-			<div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.10),transparent_55%)]" />
-			<div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_70%,rgba(120,180,255,0.10),transparent_55%)]" />
+			<div className="absolute inset-0 pointer-events-none">
+				{/* vignette */}
+				<div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,rgba(255,255,255,0.08),transparent_60%)]" />
+				<div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.08),transparent_55%)]" />
+				<div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_70%,rgba(120,180,255,0.08),transparent_55%)]" />
+			</div>
 
 			<div className="relative z-10 mx-auto max-w-5xl px-6 pt-24 md:pt-28">
 				<h1 className="text-5xl md:text-7xl font-semibold leading-[0.95] tracking-tight">
 					{"Store Finder".split("").map((ch, i) => (
-						<span
-							// eslint-disable-next-line react/no-array-index-key
-							key={i}
-							data-hero-char
-							className="inline-block will-change-transform"
-						>
+						<span key={i} data-hero-char className="inline-block will-change-transform">
 							{ch === " " ? "\u00A0" : ch}
 						</span>
 					))}
 				</h1>
 
 				<p className="mt-5 max-w-xl text-white/70">
-					Type a city or category — we’ll fetch places from Overpass and render
-					results.
+					Type a city or category — we’ll fetch places from Overpass and render results.
 				</p>
 
 				<div ref={searchWrapRef} className="mt-10 will-change-[clip-path]">
@@ -209,10 +204,7 @@ export function Hero() {
 
 					{open && (
 						<div ref={suggestsRef} className="mt-3 space-y-2">
-							{loading && (
-								<div className="text-sm text-white/40">Loading…</div>
-							)}
-
+							{loading && <div className="text-sm text-white/40">Loading…</div>}
 							{items.map((it) => (
 								<button
 									key={`${it.kind}-${it.name}`}
