@@ -3,11 +3,17 @@
 import { useEffect, useRef, useState } from "react"
 import { ensureGsap } from "@/lib/gsap/gsap"
 
+type SuggestItem = { name: string; kind: string }
+
 export function Hero() {
 	const rootRef = useRef<HTMLElement | null>(null)
 	const searchWrapRef = useRef<HTMLDivElement | null>(null)
+	const suggestsRef = useRef<HTMLDivElement | null>(null)
 
 	const [query, setQuery] = useState("")
+	const [items, setItems] = useState<SuggestItem[]>([])
+	const [open, setOpen] = useState(false)
+	const [loading, setLoading] = useState(false)
 
 	useEffect(() => {
 		const { gsap } = ensureGsap()
@@ -42,6 +48,94 @@ export function Hero() {
 			tl.kill()
 		}
 	}, [])
+
+	// Fetch suggestions from /api/overpass (debounced)
+	useEffect(() => {
+		const ac = new AbortController()
+
+		const run = async () => {
+			const q = query.trim()
+			if (q.length < 2) {
+				setItems([])
+				setOpen(false)
+				return
+			}
+
+			setLoading(true)
+			try {
+				const r = await fetch(`/api/overpass?q=${encodeURIComponent(q)}`, {
+					signal: ac.signal,
+				})
+
+				if (!r.ok) {
+					setItems([])
+					setOpen(false)
+					return
+				}
+
+				const data = (await r.json()) as {
+					elements: Array<{ tags?: Record<string, string>; type: string }>
+				}
+
+				const next = (data.elements ?? [])
+					.map((el) => {
+						const name = el.tags?.name
+						if (!name) return null
+						return { name, kind: el.type }
+					})
+					.filter(Boolean) as SuggestItem[]
+
+				const uniq: SuggestItem[] = []
+				const seen = new Set<string>()
+				for (const it of next) {
+					if (seen.has(it.name)) continue
+					seen.add(it.name)
+					uniq.push(it)
+					if (uniq.length >= 8) break
+				}
+
+				setItems(uniq)
+				setOpen(true)
+			} catch (e) {
+				if ((e as any)?.name !== "AbortError") {
+					setItems([])
+					setOpen(false)
+				}
+			} finally {
+				setLoading(false)
+			}
+		}
+
+		const t = setTimeout(run, 250)
+		return () => {
+			clearTimeout(t)
+			ac.abort()
+		}
+	}, [query])
+
+	// GSAP reveal for suggestion items (stagger + blur)
+	useEffect(() => {
+		const { gsap } = ensureGsap()
+		const wrap = suggestsRef.current
+		if (!wrap) return
+
+		const els = wrap.querySelectorAll<HTMLElement>("[data-suggest]")
+		if (!els.length) return
+
+		gsap.fromTo(
+			els,
+			{ y: 18, opacity: 0, filter: "blur(10px)" },
+			{
+				y: 0,
+				opacity: 1,
+				filter: "blur(0px)",
+				duration: 0.55,
+				ease: "power3.out",
+				stagger: 0.06,
+				clearProps: "filter",
+			},
+		)
+	}, [open, items.length])
 
 	return (
 		<section
@@ -78,17 +172,47 @@ export function Hero() {
 						<form
 							onSubmit={(e) => {
 								e.preventDefault()
-								alert(`Search: ${query}`)
+								setOpen(Boolean(items.length))
 							}}
 						>
 							<label className="block text-sm text-white/60">Search</label>
 							<input
 								value={query}
 								onChange={(e) => setQuery(e.target.value)}
+								onFocus={() => {
+									if (items.length) setOpen(true)
+								}}
+								onBlur={() => {
+									setTimeout(() => setOpen(false), 120)
+								}}
 								className="mt-2 w-full bg-transparent outline-none text-lg placeholder:text-white/30"
 								placeholder="Berlin, coffee, supermarket…"
 							/>
 						</form>
+
+						{open && (
+							<div ref={suggestsRef} className="mt-3 space-y-2">
+								{loading && (
+									<div className="text-sm text-white/40">Loading…</div>
+								)}
+
+								{items.map((it) => (
+									<button
+										key={`${it.kind}-${it.name}`}
+										type="button"
+										onClick={() => {
+											setQuery(it.name)
+											setOpen(false)
+										}}
+										className="w-full text-left rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white/90 backdrop-blur hover:bg-white/10 transition"
+										data-suggest
+									>
+										<div className="text-sm text-white/50">{it.kind}</div>
+										<div className="text-base">{it.name}</div>
+									</button>
+								))}
+							</div>
+						)}
 					</div>
 				</div>
 
