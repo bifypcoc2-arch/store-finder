@@ -36,7 +36,7 @@ export function Navbar() {
 		gsap.set(el, {
 			opacity: 0,
 			clipPath: "inset(0 0 100% 0)",
-			y: -8,
+			y: -10,
 		})
 
 		let shown = false
@@ -50,7 +50,7 @@ export function Navbar() {
 				opacity: 1,
 				y: 0,
 				clipPath: "inset(0 0 0% 0)",
-				duration: 0.45,
+				duration: 0.55,
 				ease: "power4.out",
 				overwrite: true,
 			})
@@ -61,9 +61,9 @@ export function Navbar() {
 			hiding = true
 			gsap.to(el, {
 				opacity: 0,
-				y: -10,
+				y: -12,
 				clipPath: "inset(0 0 100% 0)",
-				duration: 0.35,
+				duration: 0.38,
 				ease: "power4.in",
 				overwrite: true,
 				onComplete: () => {
@@ -78,13 +78,13 @@ export function Navbar() {
 			const dy = y - prevYRef.current
 			prevYRef.current = y
 
-			if (y < 100) {
+			if (y < 80) {
 				hide()
 				return
 			}
 
 			if (dy < -6) show()
-			else if (dy > 8) hide()
+			else if (dy > 9) hide()
 		}
 
 		prevYRef.current = window.scrollY || 0
@@ -109,7 +109,6 @@ export function Navbar() {
 		)
 	}, [lang])
 
-	// Animate hero search -> navbar search (rect-based)
 	useEffect(() => {
 		if (pathname !== "/results") return
 		const { gsap } = ensureGsap()
@@ -140,19 +139,13 @@ export function Navbar() {
 
 		gsap.fromTo(
 			el,
-			{
-				x: dx,
-				y: dy,
-				scaleX: sx,
-				scaleY: sy,
-				transformOrigin: "top left",
-			},
+			{ x: dx, y: dy, scaleX: sx, scaleY: sy, transformOrigin: "top left" },
 			{
 				x: 0,
 				y: 0,
 				scaleX: 1,
 				scaleY: 1,
-				duration: 0.8,
+				duration: 0.9,
 				ease: "power4.inOut",
 				clearProps: "transform",
 			},
@@ -161,45 +154,47 @@ export function Navbar() {
 
 	return (
 		<div ref={rootRef} className="fixed left-0 right-0 top-0 z-[9997] px-4 pt-4">
-			<div className="mx-auto max-w-6xl rounded-2xl border border-white/10 bg-black/30 backdrop-blur-xl">
-				<div className="flex items-center justify-between gap-4 px-5 py-4">
-					<Link href="/" className="group inline-flex items-center gap-3 shrink-0">
-						<div className="size-2 rounded-full bg-white/70" />
-						<div className="text-sm tracking-[0.22em] text-white/80">STORE FINDER</div>
-					</Link>
+			<div className="mx-auto max-w-6xl sf-border">
+				<div className="relative sf-glass rounded-[var(--radius-xl)] overflow-hidden">
+					<div className="absolute inset-0 opacity-70 pointer-events-none sf-sheen" />
+					<div className="flex items-center justify-between gap-4 px-5 py-4">
+						<Link href="/" className="group inline-flex items-center gap-3 shrink-0">
+							<div className="size-2 rounded-full bg-white/80 shadow-[0_0_22px_rgba(125,211,252,0.22)]" />
+							<div className="text-xs tracking-[0.28em] text-white/85">STORE FINDER</div>
+						</Link>
 
-					{/* navbar search (visible on /results) */}
-					{pathname === "/results" && (
-						<div className="hidden md:block flex-1 max-w-[520px]" ref={searchRef}>
-							<SearchBar
-								compact
-								value={q}
-								onChange={setQ}
-								onSubmit={() => {
-									const val = q.trim()
-									if (!val) return
-									router.push(`/results?q=${encodeURIComponent(val)}`)
-								}}
-							/>
-						</div>
-					)}
+						{pathname === "/results" && (
+							<div className="hidden md:block flex-1 max-w-[560px]" ref={searchRef}>
+								<SearchBar
+									compact
+									value={q}
+									onChange={setQ}
+									onSubmit={() => {
+										const val = q.trim()
+										if (!val) return
+										router.push(`/results?q=${encodeURIComponent(val)}`)
+									}}
+								/>
+							</div>
+						)}
 
-					<div className="flex items-center gap-3 shrink-0">
-						<div className="hidden sm:block text-xs text-white/50">LANG</div>
-						<div className="flex items-center rounded-full border border-white/10 bg-white/5 p-1">
-							{LANGS.map((l) => (
-								<button
-									key={l}
-									type="button"
-									onClick={() => setLang(l)}
-									className={
-										"relative rounded-full px-3 py-1 text-xs transition " +
-										(l === lang ? "text-white" : "text-white/50 hover:text-white/80")
-									}
-								>
-									{l === lang ? <span data-lang-current>{l}</span> : l}
-								</button>
-							))}
+						<div className="flex items-center gap-3 shrink-0">
+							<div className="hidden sm:block text-[11px] text-white/45 tracking-[0.22em]">LANG</div>
+							<div className="flex items-center rounded-full border border-white/10 bg-white/5 p-1">
+								{LANGS.map((l) => (
+									<button
+										key={l}
+										type="button"
+										onClick={() => setLang(l)}
+										className={
+											"relative rounded-full px-3 py-1 text-[11px] tracking-[0.20em] transition " +
+											(l === lang ? "text-white" : "text-white/45 hover:text-white/80")
+										}
+									>
+										{l === lang ? <span data-lang-current>{l}</span> : l}
+									</button>
+								))}
+							</div>
 						</div>
 					</div>
 				</div>

@@ -53,9 +53,9 @@ export function ResultsPage() {
 					y: 0,
 					opacity: 1,
 					scale: 1,
-					duration: 0.7,
-					ease: "power3.out",
-					stagger: 0.06,
+					duration: 0.85,
+					ease: "power4.out",
+					stagger: 0.055,
 				},
 			)
 		}, root)
@@ -63,32 +63,29 @@ export function ResultsPage() {
 		return () => ctx.revert()
 	}, [])
 
-	// Flip shuffle on filter change
 	useEffect(() => {
 		const { gsap, Flip } = ensureGsap()
 		const grid = gridRef.current
 		if (!grid) return
 
 		const state = Flip.getState(grid.querySelectorAll("[data-result-card]"))
-		// next paint
 		requestAnimationFrame(() => {
 			Flip.from(state, {
-				duration: 0.7,
+				duration: 0.85,
 				ease: "power4.inOut",
 				absolute: true,
-				stagger: 0.02,
+				stagger: 0.018,
 				onEnter: (els) =>
 					gsap.fromTo(
 						els,
-						{ opacity: 0, scale: 0.98 },
-						{ opacity: 1, scale: 1, duration: 0.35 },
+						{ opacity: 0, scale: 0.985, filter: "blur(8px)" },
+						{ opacity: 1, scale: 1, filter: "blur(0px)", duration: 0.38, clearProps: "filter" },
 					),
 				onLeave: (els) => gsap.to(els, { opacity: 0, duration: 0.2 }),
 			})
 		})
 	}, [filter])
 
-	// fade background cards when overlay open
 	useEffect(() => {
 		const { gsap } = ensureGsap()
 		const root = rootRef.current
@@ -99,8 +96,8 @@ export function ResultsPage() {
 
 		if (selected) {
 			gsap.to(cardsEls, {
-				scale: 0.97,
-				opacity: 0.35,
+				scale: 0.975,
+				opacity: 0.28,
 				filter: "blur(2px)",
 				duration: 0.35,
 				ease: "power2.out",
@@ -124,21 +121,21 @@ export function ResultsPage() {
 			type="button"
 			onClick={() => setFilter(v)}
 			className={
-				"rounded-full border px-4 py-2 text-sm transition " +
+				"sf-border rounded-full px-4 py-2 text-[12px] tracking-[0.18em] transition " +
 				(v === filter
-					? "border-white/20 bg-white/10 text-white"
-					: "border-white/10 bg-white/5 text-white/70 hover:bg-white/10")
+					? "text-white"
+					: "text-white/55 hover:text-white/85")
 			}
 		>
-			{v}
+			<span className="relative z-10">{v.toUpperCase()}</span>
 		</button>
 	)
 
 	return (
-		<div ref={rootRef} className="min-h-screen bg-neutral-950 text-white">
+		<div ref={rootRef} className="min-h-screen text-white">
 			<div className="mx-auto max-w-6xl px-6 pt-28 pb-10">
-				<div className="text-white/60 text-sm tracking-[0.22em]">RESULTS</div>
-				<h1 className="mt-3 text-3xl md:text-5xl font-semibold leading-[1.05]">
+				<div className="text-white/45 text-[11px] tracking-[0.26em]">RESULTS</div>
+				<h1 className="mt-3 text-3xl md:text-5xl font-semibold leading-[1.05] sf-title">
 					{q ? (
 						<>
 							Search results for <span className="text-white">“{q}”</span>
@@ -147,7 +144,9 @@ export function ResultsPage() {
 						"Search results"
 					)}
 				</h1>
-				<p className="mt-4 text-white/60">Filters shuffle cards with Flip.</p>
+				<p className="mt-4 text-white/55">
+					Flip shuffle + hover depth + overlay.
+				</p>
 
 				<div className="mt-6 flex flex-wrap gap-2">
 					<FilterButton v="All" />
@@ -158,34 +157,41 @@ export function ResultsPage() {
 			</div>
 
 			<div className="mx-auto max-w-6xl px-6 pb-24">
-				<div
-					ref={gridRef}
-					className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
-				>
+				<div ref={gridRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 					{cards.map((c) => (
 						<button
 							key={c.name}
 							type="button"
 							data-result-card
 							onClick={() => setSelected(c)}
-							className="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04] backdrop-blur-xl p-6 text-left transition hover:bg-white/[0.07]"
+							className="group relative overflow-hidden rounded-[28px] text-left"
 						>
-							<div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition">
-								<div className="absolute -inset-10 bg-[radial-gradient(circle_at_30%_30%,rgba(255,255,255,0.10),transparent_55%)]" />
-							</div>
+							<div className="absolute inset-0 sf-border" />
+							<div className="relative sf-glass rounded-[28px] overflow-hidden p-6">
+								<div className="absolute inset-0 opacity-60 pointer-events-none sf-sheen" />
+								<div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition duration-300">
+									<div className="absolute -inset-16 bg-[radial-gradient(circle_at_30%_30%,rgba(125,211,252,0.18),transparent_55%)]" />
+									<div className="absolute -inset-16 bg-[radial-gradient(circle_at_70%_70%,rgba(167,139,250,0.15),transparent_55%)]" />
+								</div>
 
-							<div className="relative">
-								<div className="text-white/50 text-xs tracking-[0.18em]">
-									{c.city.toUpperCase()} • {c.category.toUpperCase()}
+								<div className="relative">
+									<div className="text-white/45 text-[11px] tracking-[0.22em]">
+										{c.city.toUpperCase()} • {c.category.toUpperCase()}
+									</div>
+									<div className="mt-2 text-xl font-semibold">
+										<span className="relative">
+											{c.name}
+											<span className="absolute left-0 -bottom-1 h-px w-full origin-left scale-x-0 bg-white/60 transition-transform duration-300 group-hover:scale-x-100" />
+										</span>
+									</div>
+									<div className="mt-3 text-white/55">
+										{c.distanceKm.toFixed(1)} km away
+									</div>
 								</div>
-								<div className="mt-2 text-xl font-semibold">
-									<span className="relative">
-										{c.name}
-										<span className="absolute left-0 -bottom-1 h-px w-full origin-left scale-x-0 bg-white/60 transition-transform duration-300 group-hover:scale-x-100" />
-									</span>
-								</div>
-								<div className="mt-3 text-white/60">
-									{c.distanceKm.toFixed(1)} km away
+
+								{/* corner gradient sweep */}
+								<div className="absolute right-0 top-0 h-24 w-24 opacity-60">
+									<div className="absolute inset-0 bg-[conic-gradient(from_180deg,rgba(255,255,255,0.0),rgba(255,255,255,0.22),rgba(255,255,255,0.0))] translate-x-8 -translate-y-8 rotate-45" />
 								</div>
 							</div>
 						</button>
