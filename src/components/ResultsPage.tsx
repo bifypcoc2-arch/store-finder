@@ -1,8 +1,9 @@
 "use client"
 
-import { useEffect, useMemo, useRef } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { useSearchParams } from "next/navigation"
 import { ensureGsap } from "@/lib/gsap/gsap"
+import { ResultsDetailOverlay } from "@/components/ResultsDetailOverlay"
 
 type Card = {
 	name: string
@@ -27,6 +28,8 @@ export function ResultsPage() {
 		[],
 	)
 
+	const [selected, setSelected] = useState<Card | null>(null)
+
 	useEffect(() => {
 		const { gsap } = ensureGsap()
 		const root = rootRef.current
@@ -50,6 +53,37 @@ export function ResultsPage() {
 		return () => ctx.revert()
 	}, [])
 
+	// fade background cards when overlay open
+	useEffect(() => {
+		const { gsap } = ensureGsap()
+		const root = rootRef.current
+		if (!root) return
+
+		const cardsEls = root.querySelectorAll<HTMLElement>("[data-result-card]")
+		if (!cardsEls.length) return
+
+		if (selected) {
+			gsap.to(cardsEls, {
+				scale: 0.97,
+				opacity: 0.35,
+				filter: "blur(2px)",
+				duration: 0.35,
+				ease: "power2.out",
+				overwrite: true,
+			})
+		} else {
+			gsap.to(cardsEls, {
+				scale: 1,
+				opacity: 1,
+				filter: "blur(0px)",
+				duration: 0.35,
+				ease: "power2.out",
+				clearProps: "filter",
+				overwrite: true,
+			})
+		}
+	}, [selected])
+
 	return (
 		<div ref={rootRef} className="min-h-screen bg-neutral-950 text-white">
 			<div className="mx-auto max-w-6xl px-6 pt-28 pb-10">
@@ -63,9 +97,7 @@ export function ResultsPage() {
 						"Search results"
 					)}
 				</h1>
-				<p className="mt-4 text-white/60">
-					Cards + Flip transitions + map will live here.
-				</p>
+				<p className="mt-4 text-white/60">Click a card to expand.</p>
 			</div>
 
 			<div className="mx-auto max-w-6xl px-6 pb-24">
@@ -75,6 +107,7 @@ export function ResultsPage() {
 							key={c.name}
 							type="button"
 							data-result-card
+							onClick={() => setSelected(c)}
 							className="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04] backdrop-blur-xl p-6 text-left transition hover:bg-white/[0.07]"
 						>
 							<div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition">
@@ -99,6 +132,13 @@ export function ResultsPage() {
 					))}
 				</div>
 			</div>
+
+			<ResultsDetailOverlay
+				open={Boolean(selected)}
+				onClose={() => setSelected(null)}
+				title={selected?.name ?? ""}
+				subtitle={selected ? `${selected.city} • ${selected.distanceKm.toFixed(1)} km away` : ""}
+			/>
 		</div>
 	)
 }
