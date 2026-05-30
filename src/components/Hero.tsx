@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react"
 import { ensureGsap } from "@/lib/gsap/gsap"
+import { WebGLDots } from "@/components/WebGLDots"
 
 type SuggestItem = { name: string; kind: string }
 
@@ -142,11 +143,10 @@ export function Hero() {
 			ref={rootRef}
 			className="relative min-h-screen overflow-hidden bg-neutral-950 text-white"
 		>
-			{/* placeholder for WebGL canvas */}
-			<div className="absolute inset-0 opacity-40">
-				<div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.18),transparent_55%)]" />
-				<div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_70%,rgba(120,180,255,0.14),transparent_55%)]" />
-			</div>
+			{/* WebGL dots background */}
+			<WebGLDots className="absolute inset-0 opacity-90" />
+			<div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.10),transparent_55%)]" />
+			<div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_70%,rgba(120,180,255,0.10),transparent_55%)]" />
 
 			<div className="relative z-10 mx-auto max-w-5xl px-6 pt-24 md:pt-28">
 				<h1 className="text-5xl md:text-7xl font-semibold leading-[0.95] tracking-tight">
