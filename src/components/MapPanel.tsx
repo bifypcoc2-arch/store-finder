@@ -44,6 +44,7 @@ export function MapPanel({ points, activeId, onSelect }: Props) {
 	const wrapRef = useRef<HTMLDivElement | null>(null)
 	const mapRef = useRef<L.Map | null>(null)
 	const layerRef = useRef<L.LayerGroup | null>(null)
+	const routeRef = useRef<L.Polyline | null>(null)
 
 	const icon = useMemo(() => makeSvgMarker(), [])
 
@@ -51,7 +52,6 @@ export function MapPanel({ points, activeId, onSelect }: Props) {
 		const el = wrapRef.current
 		if (!el) return
 
-		// init
 		const map = L.map(el, {
 			zoomControl: false,
 			attributionControl: false,
@@ -66,13 +66,13 @@ export function MapPanel({ points, activeId, onSelect }: Props) {
 		const layer = L.layerGroup().addTo(map)
 		layerRef.current = layer
 
-		// default view (Berlin-ish)
 		map.setView([52.52, 13.405], 12)
 
 		return () => {
 			map.remove()
 			mapRef.current = null
 			layerRef.current = null
+			routeRef.current = null
 		}
 	}, [])
 
@@ -84,12 +84,48 @@ export function MapPanel({ points, activeId, onSelect }: Props) {
 
 		layer.clearLayers()
 
+		// route polyline (dashed)
+		if (routeRef.current) {
+			routeRef.current.remove()
+			routeRef.current = null
+		}
+
+		if (points.length >= 2) {
+			const latlngs = points.map((p) => [p.lat, p.lng] as [number, number])
+			const route = L.polyline(latlngs, {
+				color: "rgba(255,255,255,0.65)",
+				weight: 2,
+				opacity: 0.9,
+				dashArray: "6 10",
+			}).addTo(map)
+			routeRef.current = route
+
+			// Animate dashoffset on the SVG path
+			requestAnimationFrame(() => {
+				const path = (route as any)._path as SVGPathElement | undefined
+				if (!path) return
+				gsap.fromTo(
+					path,
+					{ strokeDashoffset: 120 },
+					{
+						strokeDashoffset: 0,
+						duration: 1.2,
+						ease: "none",
+						repeat: -1,
+					},
+				)
+			})
+		}
+
 		points.forEach((p) => {
 			const marker = L.marker([p.lat, p.lng], { icon }).addTo(layer)
 			marker.on("click", () => onSelect?.(p.id))
-			marker.bindTooltip(p.name, { direction: "top", opacity: 0.9 })
+			marker.bindTooltip(p.name, {
+				direction: "top",
+				opacity: 0.95,
+				className: "sf-tooltip",
+			})
 
-			// animate marker DOM on add
 			marker.on("add", () => {
 				const node = marker.getElement()
 				if (!node) return
@@ -97,6 +133,16 @@ export function MapPanel({ points, activeId, onSelect }: Props) {
 					node,
 					{ y: 20, scale: 0.6, opacity: 0 },
 					{ y: 0, scale: 1, opacity: 1, duration: 0.55, ease: "power4.out" },
+				)
+			})
+
+			marker.on("tooltipopen", () => {
+				const tip = document.querySelector<HTMLElement>(".sf-tooltip")
+				if (!tip) return
+				gsap.fromTo(
+					tip,
+					{ y: 8, opacity: 0 },
+					{ y: 0, opacity: 1, duration: 0.25, ease: "power2.out" },
 				)
 			})
 		})

@@ -5,30 +5,40 @@ import { useSearchParams } from "next/navigation"
 import { ensureGsap } from "@/lib/gsap/gsap"
 import { ResultsDetailOverlay } from "@/components/ResultsDetailOverlay"
 
+type Category = "All" | "Coffee" | "Market" | "Food"
+
 type Card = {
 	name: string
 	distanceKm: number
 	city: string
+	category: Exclude<Category, "All">
 }
 
 export function ResultsPage() {
 	const rootRef = useRef<HTMLDivElement | null>(null)
+	const gridRef = useRef<HTMLDivElement | null>(null)
 	const searchParams = useSearchParams()
 	const q = searchParams.get("q") ?? ""
 
-	const cards = useMemo<Card[]>(
+	const allCards = useMemo<Card[]>(
 		() => [
-			{ name: "Kaffeekult", distanceKm: 1.2, city: "Berlin" },
-			{ name: "Market 24", distanceKm: 2.8, city: "Berlin" },
-			{ name: "Green Deli", distanceKm: 0.7, city: "Berlin" },
-			{ name: "Coffee Lab", distanceKm: 3.4, city: "Berlin" },
-			{ name: "SuperMart", distanceKm: 5.1, city: "Berlin" },
-			{ name: "Bakery & Co", distanceKm: 1.9, city: "Berlin" },
+			{ name: "Kaffeekult", distanceKm: 1.2, city: "Berlin", category: "Coffee" },
+			{ name: "Market 24", distanceKm: 2.8, city: "Berlin", category: "Market" },
+			{ name: "Green Deli", distanceKm: 0.7, city: "Berlin", category: "Food" },
+			{ name: "Coffee Lab", distanceKm: 3.4, city: "Berlin", category: "Coffee" },
+			{ name: "SuperMart", distanceKm: 5.1, city: "Berlin", category: "Market" },
+			{ name: "Bakery & Co", distanceKm: 1.9, city: "Berlin", category: "Food" },
 		],
 		[],
 	)
 
+	const [filter, setFilter] = useState<Category>("All")
 	const [selected, setSelected] = useState<Card | null>(null)
+
+	const cards = useMemo(() => {
+		if (filter === "All") return allCards
+		return allCards.filter((c) => c.category === filter)
+	}, [allCards, filter])
 
 	useEffect(() => {
 		const { gsap } = ensureGsap()
@@ -52,6 +62,31 @@ export function ResultsPage() {
 
 		return () => ctx.revert()
 	}, [])
+
+	// Flip shuffle on filter change
+	useEffect(() => {
+		const { gsap, Flip } = ensureGsap()
+		const grid = gridRef.current
+		if (!grid) return
+
+		const state = Flip.getState(grid.querySelectorAll("[data-result-card]"))
+		// next paint
+		requestAnimationFrame(() => {
+			Flip.from(state, {
+				duration: 0.7,
+				ease: "power4.inOut",
+				absolute: true,
+				stagger: 0.02,
+				onEnter: (els) =>
+					gsap.fromTo(
+						els,
+						{ opacity: 0, scale: 0.98 },
+						{ opacity: 1, scale: 1, duration: 0.35 },
+					),
+				onLeave: (els) => gsap.to(els, { opacity: 0, duration: 0.2 }),
+			})
+		})
+	}, [filter])
 
 	// fade background cards when overlay open
 	useEffect(() => {
@@ -84,6 +119,21 @@ export function ResultsPage() {
 		}
 	}, [selected])
 
+	const FilterButton = ({ v }: { v: Category }) => (
+		<button
+			type="button"
+			onClick={() => setFilter(v)}
+			className={
+				"rounded-full border px-4 py-2 text-sm transition " +
+				(v === filter
+					? "border-white/20 bg-white/10 text-white"
+					: "border-white/10 bg-white/5 text-white/70 hover:bg-white/10")
+			}
+		>
+			{v}
+		</button>
+	)
+
 	return (
 		<div ref={rootRef} className="min-h-screen bg-neutral-950 text-white">
 			<div className="mx-auto max-w-6xl px-6 pt-28 pb-10">
@@ -97,11 +147,21 @@ export function ResultsPage() {
 						"Search results"
 					)}
 				</h1>
-				<p className="mt-4 text-white/60">Click a card to expand.</p>
+				<p className="mt-4 text-white/60">Filters shuffle cards with Flip.</p>
+
+				<div className="mt-6 flex flex-wrap gap-2">
+					<FilterButton v="All" />
+					<FilterButton v="Coffee" />
+					<FilterButton v="Market" />
+					<FilterButton v="Food" />
+				</div>
 			</div>
 
 			<div className="mx-auto max-w-6xl px-6 pb-24">
-				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+				<div
+					ref={gridRef}
+					className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+				>
 					{cards.map((c) => (
 						<button
 							key={c.name}
@@ -116,7 +176,7 @@ export function ResultsPage() {
 
 							<div className="relative">
 								<div className="text-white/50 text-xs tracking-[0.18em]">
-									{c.city.toUpperCase()}
+									{c.city.toUpperCase()} • {c.category.toUpperCase()}
 								</div>
 								<div className="mt-2 text-xl font-semibold">
 									<span className="relative">
@@ -137,7 +197,11 @@ export function ResultsPage() {
 				open={Boolean(selected)}
 				onClose={() => setSelected(null)}
 				title={selected?.name ?? ""}
-				subtitle={selected ? `${selected.city} • ${selected.distanceKm.toFixed(1)} km away` : ""}
+				subtitle={
+					selected
+						? `${selected.city} • ${selected.distanceKm.toFixed(1)} km away • ${selected.category}`
+						: ""
+				}
 			/>
 		</div>
 	)
