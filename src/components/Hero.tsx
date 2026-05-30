@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
+import { useRouter } from "next/navigation"
 import { ensureGsap } from "@/lib/gsap/gsap"
 import { WebGLDots } from "@/components/WebGLDots"
 import { ScrollIndicator } from "@/components/ScrollIndicator"
@@ -8,6 +9,7 @@ import { ScrollIndicator } from "@/components/ScrollIndicator"
 type SuggestItem = { name: string; kind: string }
 
 export function Hero() {
+	const router = useRouter()
 	const rootRef = useRef<HTMLElement | null>(null)
 	const searchWrapRef = useRef<HTMLDivElement | null>(null)
 	const suggestsRef = useRef<HTMLDivElement | null>(null)
@@ -173,7 +175,9 @@ export function Hero() {
 						<form
 							onSubmit={(e) => {
 								e.preventDefault()
-								setOpen(Boolean(items.length))
+								const val = query.trim()
+								if (!val) return
+								router.push(`/results?q=${encodeURIComponent(val)}`)
 							}}
 						>
 							<label className="block text-sm text-white/60">Search</label>
@@ -205,6 +209,9 @@ export function Hero() {
 										onClick={() => {
 											setQuery(it.name)
 											setOpen(false)
+											router.push(
+												`/results?q=${encodeURIComponent(it.name)}`,
+											)
 										}}
 										className="w-full text-left rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white/90 backdrop-blur hover:bg-white/10 transition"
 										data-suggest
