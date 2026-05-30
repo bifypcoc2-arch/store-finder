@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 import { ensureGsap } from "@/lib/gsap/gsap"
 import { WebGLDots } from "@/components/WebGLDots"
+import { ScrollIndicator } from "@/components/ScrollIndicator"
 
 type SuggestItem = { name: string; kind: string }
 
@@ -216,9 +217,9 @@ export function Hero() {
 						)}
 					</div>
 				</div>
-
-				<div className="mt-14 text-white/60 text-sm">Scroll ↓</div>
 			</div>
+
+			<ScrollIndicator />
 		</section>
 	)
 }
