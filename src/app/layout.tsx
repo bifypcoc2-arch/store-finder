@@ -1,6 +1,8 @@
 import type { Metadata } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
 import { AnimationRuntime } from "@/components/AnimationRuntime"
+import { CustomCursor } from "@/components/CustomCursor"
+import { GrainOverlay } from "@/components/GrainOverlay"
 import { Navbar } from "@/components/Navbar"
 import { TransitionCurtain } from "@/components/TransitionCurtain"
 import "./globals.css"
@@ -34,6 +36,8 @@ export default function RootLayout({
 				<AnimationRuntime />
 				<Navbar />
 				<TransitionCurtain />
+				<GrainOverlay />
+				<CustomCursor />
 				{children}
 			</body>
 		</html>

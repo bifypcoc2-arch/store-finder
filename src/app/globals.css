@@ -25,3 +25,43 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Custom cursor */
+* { cursor: none; }
+
+.sf-cursor-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: rgba(255,255,255,0.9);
+  transform: translate(-50%, -50%);
+}
+
+.sf-cursor-ring {
+  width: 42px;
+  height: 42px;
+  border-radius: 9999px;
+  border: 1px solid rgba(255,255,255,0.35);
+  transform: translate(-50%, -50%);
+  transition: transform 140ms ease, border-color 140ms ease, background 140ms ease, mix-blend-mode 140ms ease;
+}
+
+.sf-cursor-ring.sf-cursor--hover {
+  transform: translate(-50%, -50%) scaleX(1.6) scaleY(0.55);
+  border-color: rgba(255,255,255,0.55);
+}
+
+.sf-cursor-ring.sf-cursor--active {
+  background: rgba(255,255,255,0.9);
+  mix-blend-mode: difference;
+}
+
+/* Leaflet tooltip style */
+.sf-tooltip {
+  background: rgba(10,10,10,0.75) !important;
+  border: 1px solid rgba(255,255,255,0.15) !important;
+  color: rgba(255,255,255,0.9) !important;
+  border-radius: 12px !important;
+  padding: 6px 10px !important;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.45) !important;
+}
