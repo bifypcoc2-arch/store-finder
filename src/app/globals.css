@@ -2,24 +2,26 @@
 @import "leaflet/dist/leaflet.css";
 
 :root {
-  --bg0: #05060a;
-  --bg1: #070a12;
-  --fg0: rgba(255,255,255,0.92);
-  --fg1: rgba(255,255,255,0.70);
-  --fg2: rgba(255,255,255,0.45);
-
-  --a0: #7dd3fc; /* sky */
-  --a1: #a78bfa; /* violet */
-  --a2: #fb7185; /* rose */
-  --a3: #34d399; /* emerald */
-
-  --glass: rgba(255,255,255,0.06);
-  --glass2: rgba(255,255,255,0.10);
+  /* Core palette */
+  --bg: #04050a;
+  --bg2: #070815;
+  --panel: rgba(255,255,255,0.05);
+  --panel2: rgba(255,255,255,0.08);
   --stroke: rgba(255,255,255,0.12);
   --stroke2: rgba(255,255,255,0.18);
-  --shadow: rgba(0,0,0,0.55);
+  --text: rgba(255,255,255,0.92);
+  --muted: rgba(255,255,255,0.62);
+  --muted2: rgba(255,255,255,0.42);
 
-  --radius-xl: 24px;
+  /* Accents */
+  --c1: #60a5fa; /* blue */
+  --c2: #a78bfa; /* violet */
+  --c3: #fb7185; /* rose */
+  --c4: #34d399; /* emerald */
+
+  --r1: 18px;
+  --r2: 26px;
+  --shadow: rgba(0,0,0,0.6);
 }
 
 @theme inline {
@@ -30,17 +32,17 @@
 html, body { height: 100%; }
 
 body {
-  color: var(--fg0);
+  color: var(--text);
   font-family: var(--font-sans), system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   background:
-    radial-gradient(1200px 700px at 20% 10%, rgba(125,211,252,0.14), transparent 55%),
-    radial-gradient(900px 600px at 75% 20%, rgba(167,139,250,0.14), transparent 58%),
-    radial-gradient(900px 800px at 80% 85%, rgba(251,113,133,0.09), transparent 62%),
-    radial-gradient(900px 700px at 15% 85%, rgba(52,211,153,0.07), transparent 60%),
-    linear-gradient(180deg, var(--bg0), var(--bg1));
+    radial-gradient(900px 600px at 10% 12%, rgba(96,165,250,0.18), transparent 60%),
+    radial-gradient(900px 700px at 85% 10%, rgba(167,139,250,0.16), transparent 62%),
+    radial-gradient(800px 700px at 80% 88%, rgba(251,113,133,0.11), transparent 62%),
+    radial-gradient(850px 650px at 15% 90%, rgba(52,211,153,0.09), transparent 62%),
+    linear-gradient(180deg, var(--bg), var(--bg2));
 }
 
-/* Hide system cursor only on devices with a fine pointer (desktop/mouse). */
+/* Cursor behavior */
 @media (pointer: fine) {
   * { cursor: none; }
 }
@@ -54,48 +56,40 @@ body {
   }
 }
 
-/* Utility: fancy gradient border wrapper */
-.sf-border {
-  position: relative;
-  border-radius: var(--radius-xl);
-}
-.sf-border::before {
-  content: "";
-  position: absolute;
-  inset: -1px;
-  border-radius: inherit;
-  padding: 1px;
-  background:
-    conic-gradient(from 180deg,
-      rgba(125,211,252,0.0), rgba(125,211,252,0.55),
-      rgba(167,139,250,0.55),
-      rgba(251,113,133,0.45),
-      rgba(52,211,153,0.40),
-      rgba(125,211,252,0.55),
-      rgba(125,211,252,0.0)
-    );
-  -webkit-mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  opacity: 0.45;
-  filter: blur(0.2px);
-  pointer-events: none;
+/* Layout primitives */
+.sf-shell { max-width: 1200px; margin: 0 auto; padding-left: 24px; padding-right: 24px; }
+
+.sf-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--stroke);
+  background: rgba(255,255,255,0.04);
+  backdrop-filter: blur(14px);
 }
 
-.sf-glass {
-  background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+.sf-panel {
+  border-radius: var(--r2);
   border: 1px solid var(--stroke);
-  box-shadow:
-    0 30px 90px var(--shadow),
-    inset 0 1px 0 rgba(255,255,255,0.08);
+  background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+  box-shadow: 0 30px 100px var(--shadow), inset 0 1px 0 rgba(255,255,255,0.10);
   backdrop-filter: blur(18px);
 }
 
-.sf-title {
-  letter-spacing: -0.03em;
+.sf-panel--hard {
+  background: rgba(10,11,18,0.62);
 }
+
+.sf-divider {
+  height: 1px;
+  width: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.14), transparent);
+}
+
+.sf-h1 { letter-spacing: -0.05em; }
+.sf-h2 { letter-spacing: -0.04em; }
 
 /* Custom cursor */
 .sf-cursor-dot {
@@ -108,34 +102,34 @@ body {
 }
 
 .sf-cursor-ring {
-  width: 44px;
-  height: 44px;
+  width: 46px;
+  height: 46px;
   border-radius: 9999px;
-  border: 1px solid rgba(255,255,255,0.28);
+  border: 1px solid rgba(255,255,255,0.24);
   transform: translate(-50%, -50%);
   transition:
-    transform 160ms cubic-bezier(.2,.8,.2,1),
-    border-color 160ms ease,
-    background 160ms ease,
-    mix-blend-mode 160ms ease,
-    box-shadow 160ms ease;
-  box-shadow: 0 0 0 1px rgba(255,255,255,0.05), 0 0 32px rgba(125,211,252,0.06);
+    transform 170ms cubic-bezier(.2,.8,.2,1),
+    border-color 170ms ease,
+    background 170ms ease,
+    mix-blend-mode 170ms ease,
+    box-shadow 170ms ease;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.05), 0 0 38px rgba(96,165,250,0.08);
 }
 
 .sf-cursor-ring.sf-cursor--hover {
-  transform: translate(-50%, -50%) scaleX(1.8) scaleY(0.50);
-  border-color: rgba(255,255,255,0.45);
+  transform: translate(-50%, -50%) scaleX(1.9) scaleY(0.50);
+  border-color: rgba(255,255,255,0.42);
 }
 
 .sf-cursor-ring.sf-cursor--active {
   background: rgba(255,255,255,0.92);
   mix-blend-mode: difference;
-  box-shadow: 0 0 60px rgba(255,255,255,0.20);
+  box-shadow: 0 0 70px rgba(255,255,255,0.22);
 }
 
-/* Leaflet tooltip style */
+/* Leaflet */
 .sf-tooltip {
-  background: rgba(8,10,14,0.72) !important;
+  background: rgba(8,10,14,0.74) !important;
   border: 1px solid rgba(255,255,255,0.14) !important;
   color: rgba(255,255,255,0.92) !important;
   border-radius: 14px !important;
@@ -144,14 +138,18 @@ body {
   backdrop-filter: blur(14px);
 }
 
-/* make leaflet panes look integrated */
 .leaflet-container { background: rgba(6,7,10,1); }
-.leaflet-tile { filter: saturate(0.75) contrast(1.05) brightness(0.85); }
+.leaflet-tile { filter: saturate(0.78) contrast(1.06) brightness(0.84); }
 
-/* subtle animated sheen for big surfaces */
+/* Keyframe accents */
+@keyframes sf-float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
 @keyframes sf-sheen {
   0% { transform: translateX(-30%) rotate(12deg); opacity: 0; }
-  20% { opacity: 1; }
+  15% { opacity: 1; }
   55% { opacity: 0.8; }
   100% { transform: translateX(140%) rotate(12deg); opacity: 0; }
 }
@@ -159,12 +157,12 @@ body {
 .sf-sheen::after {
   content: "";
   position: absolute;
-  top: -40%;
-  left: -40%;
+  top: -50%;
+  left: -50%;
   width: 60%;
-  height: 180%;
+  height: 200%;
   background: linear-gradient(90deg, transparent, rgba(255,255,255,0.14), transparent);
   transform: translateX(-30%) rotate(12deg);
-  animation: sf-sheen 7.5s cubic-bezier(.2,.8,.2,1) infinite;
+  animation: sf-sheen 8.5s cubic-bezier(.2,.8,.2,1) infinite;
   pointer-events: none;
 }

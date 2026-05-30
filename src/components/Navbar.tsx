@@ -33,11 +33,7 @@ export function Navbar() {
 		const el = rootRef.current
 		if (!el) return
 
-		gsap.set(el, {
-			opacity: 0,
-			clipPath: "inset(0 0 100% 0)",
-			y: -10,
-		})
+		gsap.set(el, { opacity: 0, y: -12, clipPath: "inset(0 0 100% 0)" })
 
 		let shown = false
 		let hiding = false
@@ -50,7 +46,7 @@ export function Navbar() {
 				opacity: 1,
 				y: 0,
 				clipPath: "inset(0 0 0% 0)",
-				duration: 0.55,
+				duration: 0.6,
 				ease: "power4.out",
 				overwrite: true,
 			})
@@ -61,9 +57,9 @@ export function Navbar() {
 			hiding = true
 			gsap.to(el, {
 				opacity: 0,
-				y: -12,
+				y: -14,
 				clipPath: "inset(0 0 100% 0)",
-				duration: 0.38,
+				duration: 0.4,
 				ease: "power4.in",
 				overwrite: true,
 				onComplete: () => {
@@ -77,20 +73,17 @@ export function Navbar() {
 			const y = window.scrollY || 0
 			const dy = y - prevYRef.current
 			prevYRef.current = y
-
 			if (y < 80) {
 				hide()
 				return
 			}
-
 			if (dy < -6) show()
-			else if (dy > 9) hide()
+			else if (dy > 10) hide()
 		}
 
 		prevYRef.current = window.scrollY || 0
 		window.addEventListener("scroll", onScroll, { passive: true })
 		onScroll()
-
 		return () => window.removeEventListener("scroll", onScroll)
 	}, [])
 
@@ -98,15 +91,9 @@ export function Navbar() {
 		const { gsap } = ensureGsap()
 		const el = rootRef.current
 		if (!el) return
-
 		const from = el.querySelector("[data-lang-current]")
 		if (!from) return
-
-		gsap.fromTo(
-			from,
-			{ y: 10, opacity: 0 },
-			{ y: 0, opacity: 1, duration: 0.25, ease: "power2.out" },
-		)
+		gsap.fromTo(from, { y: 10, opacity: 0 }, { y: 0, opacity: 1, duration: 0.25, ease: "power2.out" })
 	}, [lang])
 
 	useEffect(() => {
@@ -114,18 +101,12 @@ export function Navbar() {
 		const { gsap } = ensureGsap()
 		const el = searchRef.current
 		if (!el) return
-
 		const raw = sessionStorage.getItem("sf:searchAnim")
 		if (!raw) return
 
 		let parsed: StoredSearchAnim | null = null
-		try {
-			parsed = JSON.parse(raw) as StoredSearchAnim
-		} catch {
-			parsed = null
-		}
+		try { parsed = JSON.parse(raw) as StoredSearchAnim } catch { parsed = null }
 		if (!parsed) return
-
 		sessionStorage.removeItem("sf:searchAnim")
 
 		const toRect = el.getBoundingClientRect()
@@ -140,46 +121,31 @@ export function Navbar() {
 		gsap.fromTo(
 			el,
 			{ x: dx, y: dy, scaleX: sx, scaleY: sy, transformOrigin: "top left" },
-			{
-				x: 0,
-				y: 0,
-				scaleX: 1,
-				scaleY: 1,
-				duration: 0.9,
-				ease: "power4.inOut",
-				clearProps: "transform",
-			},
+			{ x: 0, y: 0, scaleX: 1, scaleY: 1, duration: 0.95, ease: "power4.inOut", clearProps: "transform" },
 		)
 	}, [pathname])
 
 	return (
 		<div ref={rootRef} className="fixed left-0 right-0 top-0 z-[9997] px-4 pt-4">
-			<div className="mx-auto max-w-6xl sf-border">
-				<div className="relative sf-glass rounded-[var(--radius-xl)] overflow-hidden">
-					<div className="absolute inset-0 opacity-70 pointer-events-none sf-sheen" />
+			<div className="sf-shell">
+				<div className="sf-panel sf-panel--hard relative overflow-hidden rounded-[var(--r2)]">
+					<div className="absolute inset-0 opacity-60 pointer-events-none sf-sheen" />
 					<div className="flex items-center justify-between gap-4 px-5 py-4">
-						<Link href="/" className="group inline-flex items-center gap-3 shrink-0">
-							<div className="size-2 rounded-full bg-white/80 shadow-[0_0_22px_rgba(125,211,252,0.22)]" />
-							<div className="text-xs tracking-[0.28em] text-white/85">STORE FINDER</div>
+						<Link href="/" className="inline-flex items-center gap-3 shrink-0">
+							<span className="size-2 rounded-full bg-white/80 shadow-[0_0_22px_rgba(96,165,250,0.22)]" />
+							<span className="text-[11px] tracking-[0.30em] text-white/85">STORE FINDER</span>
 						</Link>
 
 						{pathname === "/results" && (
 							<div className="hidden md:block flex-1 max-w-[560px]" ref={searchRef}>
-								<SearchBar
-									compact
-									value={q}
-									onChange={setQ}
-									onSubmit={() => {
-										const val = q.trim()
-										if (!val) return
-										router.push(`/results?q=${encodeURIComponent(val)}`)
-									}}
-								/>
+								<SearchBar compact value={q} onChange={setQ} onSubmit={() => {
+									const val = q.trim(); if (!val) return; router.push(`/results?q=${encodeURIComponent(val)}`)
+								}} />
 							</div>
 						)}
 
 						<div className="flex items-center gap-3 shrink-0">
-							<div className="hidden sm:block text-[11px] text-white/45 tracking-[0.22em]">LANG</div>
+							<div className="hidden sm:block text-[11px] text-white/45 tracking-[0.26em]">LANG</div>
 							<div className="flex items-center rounded-full border border-white/10 bg-white/5 p-1">
 								{LANGS.map((l) => (
 									<button
@@ -187,8 +153,8 @@ export function Navbar() {
 										type="button"
 										onClick={() => setLang(l)}
 										className={
-											"relative rounded-full px-3 py-1 text-[11px] tracking-[0.20em] transition " +
-											(l === lang ? "text-white" : "text-white/45 hover:text-white/80")
+											"relative rounded-full px-3 py-1 text-[11px] tracking-[0.22em] transition " +
+											(l === lang ? "text-white" : "text-white/45 hover:text-white/85")
 										}
 									>
 										{l === lang ? <span data-lang-current>{l}</span> : l}
