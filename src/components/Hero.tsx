@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { ensureGsap } from "@/lib/gsap/gsap"
+import { navigateWithTransition } from "@/lib/transitions/navigateWithTransition"
 import { WebGLDots } from "@/components/WebGLDots"
 import { ScrollIndicator } from "@/components/ScrollIndicator"
 import { SearchBar } from "@/components/SearchBar"
@@ -55,7 +56,6 @@ export function Hero() {
 		}
 	}, [])
 
-	// Fetch suggestions from /api/overpass (debounced)
 	useEffect(() => {
 		const ac = new AbortController()
 
@@ -119,7 +119,6 @@ export function Hero() {
 		}
 	}, [query])
 
-	// GSAP reveal for suggestion items (stagger + blur)
 	useEffect(() => {
 		const { gsap } = ensureGsap()
 		const wrap = suggestsRef.current
@@ -155,7 +154,11 @@ export function Hero() {
 				}),
 			)
 		}
-		router.push(`/results?q=${encodeURIComponent(val)}`)
+
+		navigateWithTransition(
+			(url) => router.push(url),
+			`/results?q=${encodeURIComponent(val)}`,
+		)
 	}
 
 	return (
