@@ -177,6 +177,7 @@ export function Hero() {
 						>
 							<label className="block text-sm text-white/60">Search</label>
 							<input
+								suppressHydrationWarning
 								value={query}
 								onChange={(e) => setQuery(e.target.value)}
 								onFocus={() => {
