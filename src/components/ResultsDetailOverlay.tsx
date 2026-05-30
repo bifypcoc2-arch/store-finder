@@ -1,7 +1,8 @@
 "use client"
 
-import { useEffect, useRef } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { ensureGsap } from "@/lib/gsap/gsap"
+import { MapPanel, type MapPoint } from "@/components/MapPanel"
 
 type Props = {
 	open: boolean
@@ -13,6 +14,20 @@ type Props = {
 export function ResultsDetailOverlay({ open, onClose, title, subtitle }: Props) {
 	const rootRef = useRef<HTMLDivElement | null>(null)
 	const panelRef = useRef<HTMLDivElement | null>(null)
+	const [activeId, setActiveId] = useState<string | undefined>(undefined)
+
+	const points = useMemo<MapPoint[]>(
+		() => [
+			{ id: "a", name: "Point A", lat: 52.5208, lng: 13.4095 },
+			{ id: "b", name: "Point B", lat: 52.5176, lng: 13.3976 },
+			{ id: "c", name: "Point C", lat: 52.5135, lng: 13.4211 },
+		],
+		[],
+	)
+
+	useEffect(() => {
+		if (!open) setActiveId(undefined)
+	}, [open])
 
 	useEffect(() => {
 		const { gsap } = ensureGsap()
@@ -57,7 +72,7 @@ export function ResultsDetailOverlay({ open, onClose, title, subtitle }: Props) 
 		>
 			<div
 				ref={panelRef}
-				className="w-[min(980px,92vw)] rounded-3xl border border-white/10 bg-neutral-950/80 backdrop-blur-xl p-8 md:p-10 shadow-[0_20px_80px_rgba(0,0,0,0.55)]"
+				className="w-[min(1100px,92vw)] rounded-3xl border border-white/10 bg-neutral-950/80 backdrop-blur-xl p-8 md:p-10 shadow-[0_20px_80px_rgba(0,0,0,0.55)]"
 			>
 				<div className="flex items-start justify-between gap-6">
 					<div>
@@ -78,17 +93,41 @@ export function ResultsDetailOverlay({ open, onClose, title, subtitle }: Props) 
 				</div>
 
 				<div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
-					<div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
-						<div className="text-white/60 text-sm">Map panel (next)</div>
-						<div className="mt-2 h-48 rounded-xl bg-[radial-gradient(circle_at_30%_30%,rgba(255,255,255,0.10),transparent_55%)]" />
-					</div>
+					<MapPanel
+						points={points}
+						activeId={activeId}
+						onSelect={setActiveId}
+					/>
 					<div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
 						<div className="text-white/60 text-sm">Info</div>
 						<ul className="mt-3 space-y-2 text-white/75 text-sm">
-							<li>• Flip expand + background blur</li>
-							<li>• Route + markers coming next</li>
-							<li>• Filters + Flip shuffle coming next</li>
+							<li>• Leaflet map + animated markers</li>
+							<li>• Click marker: flyTo</li>
+							<li>• Route + filters next</li>
 						</ul>
+						<div className="mt-4 flex gap-2">
+							<button
+								type="button"
+								onClick={() => setActiveId("a")}
+								className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/80 hover:bg-white/10 transition"
+							>
+								Fly A
+							</button>
+							<button
+								type="button"
+								onClick={() => setActiveId("b")}
+								className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/80 hover:bg-white/10 transition"
+							>
+								Fly B
+							</button>
+							<button
+								type="button"
+								onClick={() => setActiveId("c")}
+								className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/80 hover:bg-white/10 transition"
+							>
+								Fly C
+							</button>
+						</div>
 					</div>
 				</div>
 			</div>
